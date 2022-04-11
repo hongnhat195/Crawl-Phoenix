@@ -1,0 +1,8 @@
+<h1>
+    Choose the action you want to:
+</h1>
+
+
+<%= link "Download data as JSON file here", to: Routes.crawl_path(@conn, :download), class: "nav-link" %>
+<br>
+<%= link "Show data  here", to: Routes.crawl_path(@conn, :show), class: "nav-link" %>

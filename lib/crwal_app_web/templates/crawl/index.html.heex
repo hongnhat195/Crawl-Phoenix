@@ -1,0 +1,11 @@
+<section class="phx-hero">
+  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
+  <p>Enter the URL to crawl data</p>
+</section>
+
+<section class="row container">
+<%= form_for @conn, Routes.crawl_path(@conn, :create), [as: :data], fn f -> %>
+  <%= text_input f, :url %>
+  <%= submit "Enter" %>
+<% end %>
+</section>
