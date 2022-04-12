@@ -6,6 +6,9 @@
 <section class="row container">
 <%= form_for @conn, Routes.crawl_path(@conn, :create), [as: :data], fn f -> %>
   <%= text_input f, :url %>
+  <br/>
+  <br/>
+  <br/>
   <%= submit "Enter" %>
 <% end %>
 </section>

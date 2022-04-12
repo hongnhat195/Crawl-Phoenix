@@ -1,8 +1,15 @@
 <%= if @pagination > 1 do %>
-<button class="btn btn-light"><%= link "prev", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination -  1 ), class: "nav-link" %></button>
+<button class="btn btn-light"><%= link "First", to: Routes.crawl_path(@conn, :pagination_page, pagination:  1 ), class: "nav-link" %></button>
+<button class="btn btn-light"><%= link "Rrev", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination -  1 ), class: "nav-link" %></button>
 <% end %>
+
 <button class="btn btn-light"> <%= link  @pagination , to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination ), class: "nav-link" %></button>
-<button class="btn btn-light"><%= link "next", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination + 1 ), class: "nav-link" %></button>
+
+<%= if @pagination < @max_pages do %>
+<button class="btn btn-light"><%= link "Next", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination + 1 ), class: "nav-link" %></button>
+
+<button class="btn btn-light"><%= link "Last", to: Routes.crawl_path(@conn, :pagination_page, pagination: @max_pages ), class: "nav-link" %></button>
+<% end %>
 
 <table class="table center">
   <thead>
