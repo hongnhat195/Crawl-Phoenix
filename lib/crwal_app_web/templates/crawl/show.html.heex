@@ -1,25 +1,37 @@
+<div class="d-flex flex-row justify-content-between">
+<div class="left  ">
 <%= if @pagination > 1 do %>
 <button class="btn btn-light"><%= link "First", to: Routes.crawl_path(@conn, :pagination_page, pagination:  1 ), class: "nav-link" %></button>
 
 <button class="btn btn-light"><%= link "Prev", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination -  1 ), class: "nav-link" %></button>
 
+<button class="btn btn-light"> <%= link  @pagination - 1 , to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination - 1 ), class: "nav-link" %></button>
 <% end %>
 
-<button class="btn btn-light"> <%= link  @pagination , to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination ), class: "nav-link" %></button>
+<button class="btn btn-info"> <%= link  @pagination , to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination ), class: "nav-link" %></button>
 
 <%= if @pagination < @max_pages do %>
+
+<button class="btn btn-light"> <%= link  @pagination + 1 , to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination + 1 ), class: "nav-link" %></button>
 
 <button class="btn btn-light"><%= link "Next", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination + 1 ), class: "nav-link" %></button>
 
-<button class="btn btn-light"><%= link "Last", to: Routes.crawl_path(@conn, :pagination_page, pagination: @max_pages ), class: "nav-link" %></button>
 <% end %>
-
 
 <%= if @pagination < @max_pages do %>
 <button class="btn btn-light"><%= link "Last", to: Routes.crawl_path(@conn, :pagination_page, pagination: @max_pages ), class: "nav-link" %></button>
 <% end %>
 
-<table class="table center">
+</div>
+
+<div class="right">
+<%= form_for  @conn, Routes.crawl_path(@conn, :create), [as: :data], fn f -> %>
+<%= text_input f,:year  %>
+<% end %>
+</div>
+
+</div>
+<table class="table  fs-3 table-responsive text-center ">
   <thead>
     <tr>
       <th scope="col">Page</th>
@@ -36,8 +48,8 @@
     <tr>
       <th scope="row"> <%=Enum.at(film, 0) %> </th>
       <td> <%=Enum.at(film, 1) %></td>
-      <td> <%=Enum.at(film, 2) %></td>
-      <td> <%=Enum.at(film, 3) %></td>
+      <td> <a target="_blank" href={"#{Enum.at(film, 2)}"}> <%=Enum.at(film, 2) %> </a></td>
+      <td> <a target="_blank" href={"#{Enum.at(film, 3)}"}> <%=Enum.at(film, 3) %>  </a></td>
       <td> <%=Enum.at(film, 4) %></td>
       <td> <%=Enum.at(film, 5) %></td>
       <td> <%=Enum.at(film, 6) %></td>

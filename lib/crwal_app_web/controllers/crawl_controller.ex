@@ -66,6 +66,6 @@ defmodule CrwalAppWeb.CrawlController do
   end
 
   defp max_page() do
-    from p in "crawl", where: p.page > 9, select: max(type(p.page, :string))
+    from p in "crawl", where: p.page > 10, select: max(type(p.page, :string))
   end
 end
