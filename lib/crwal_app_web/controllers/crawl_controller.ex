@@ -5,7 +5,7 @@ defmodule CrwalAppWeb.CrawlController do
   alias CrwalApp.Repo
   alias CrwalApp.Crawl
 
-  import Ecto.Query, warn: false
+  import Ecto.Query, warn: false, only: [from: 2]
 
   def index(conn, _params) do
     render(conn, "index.html")
@@ -35,14 +35,20 @@ defmodule CrwalAppWeb.CrawlController do
       Repo.insert_all(Crawl, list_film)
     end
 
-    pagination_page(conn, %{"pagination" => 1})
+    pagination_page(conn, %{"pagination" => "1"})
   end
 
-  def pagination_page(conn, params) do
-    IO.inspect(params, label: "Pagination: ")
-    %{"pagination" => pagination} = params
+  def pagination_page(conn, %{"pagination" => pagination}) do
     pagination = String.to_integer(pagination)
 
+    max_pages = Repo.all(max_page()) |> Enum.at(0) |> String.to_integer()
+    res = query_film(pagination)
+
+    IO.inspect(max_pages, label: "show.html +++++++++++++++++++++++++: ")
+    render(conn, "show.html", list_films: res, pagination: pagination, max_pages: max_pages)
+  end
+
+  defp query_film(pagination) do
     query =
       from u in "crawl",
         where: u.page == ^pagination,
@@ -56,8 +62,10 @@ defmodule CrwalAppWeb.CrawlController do
           u.full_series
         ]
 
-    res = Repo.all(query)
-    # IO.inspect(res, label: "show.html +++++++++++++++++++++++++=")
-    render(conn, "show.html", list_films: res, pagination: pagination)
+    Repo.all(query)
+  end
+
+  defp max_page() do
+    from p in "crawl", where: p.page > 38, select: min(type(p.page, :string))
   end
 end
