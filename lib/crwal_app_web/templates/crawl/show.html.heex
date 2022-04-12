@@ -1,0 +1,33 @@
+<%= if @pagination > 1 do %>
+<button class="btn btn-light"><%= link "prev", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination -  1 ), class: "nav-link" %></button>
+<% end %>
+<button class="btn btn-light"> <%= link  @pagination , to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination ), class: "nav-link" %></button>
+<button class="btn btn-light"><%= link "next", to: Routes.crawl_path(@conn, :pagination_page, pagination: @pagination + 1 ), class: "nav-link" %></button>
+
+<table class="table center">
+  <thead>
+    <tr>
+      <th scope="col">Page</th>
+      <th scope="col">Title</th>
+      <th scope="col">Link</th>
+      <th scope="col">Thumbnail</th>
+      <th scope="col">Episode</th>
+      <th scope="col">Year</th>
+      <th scope="col">Full_series</th>
+    </tr>
+  </thead>
+  <tbody>
+  <%= for film <- @list_films do %>
+    <tr>
+      <th scope="row"> <%=Enum.at(film, 0) %> </th>
+      <td> <%=Enum.at(film, 1) %></td>
+      <td> <%=Enum.at(film, 2) %></td>
+      <td> <%=Enum.at(film, 3) %></td>
+      <td> <%=Enum.at(film, 4) %></td>
+      <td> <%=Enum.at(film, 5) %></td>
+      <td> <%=Enum.at(film, 6) %></td>
+    </tr>
+   <% end %>
+  </tbody>
+</table>
+

@@ -21,6 +21,7 @@ defmodule CrwalAppWeb.Router do
     post "/", CrawlController, :create
     get "/download", CrawlController, :download
     get "/show", CrawlController, :show
+    get "/pagi", CrawlController, :pagination_page
   end
 
   # Other scopes may use custom stacks.

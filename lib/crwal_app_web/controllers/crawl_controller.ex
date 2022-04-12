@@ -5,6 +5,8 @@ defmodule CrwalAppWeb.CrawlController do
   alias CrwalApp.Repo
   alias CrwalApp.Crawl
 
+  import Ecto.Query, warn: false
+
   def index(conn, _params) do
     render(conn, "index.html")
   end
@@ -24,14 +26,38 @@ defmodule CrwalAppWeb.CrawlController do
   end
 
   def show(conn, _params) do
-    {:ok, list} = File.read("priv/static/film.json")
-    {:ok, list1} = Jason.decode(list, keys: :atoms)
-    list_film = list1[:list_film]
-
     if Repo.all(Crawl) == [] do
+      {:ok, list} = File.read("priv/static/film.json")
+      IO.inspect(list)
+      {:ok, list1} = Jason.decode(list, keys: :atoms)
+      list_film = list1[:list_films]
+      IO.inspect(list_film)
       Repo.insert_all(Crawl, list_film)
     end
 
-    render(conn, "action.html")
+    pagination_page(conn, %{"pagination" => 1})
+  end
+
+  def pagination_page(conn, params) do
+    IO.inspect(params, label: "Pagination: ")
+    %{"pagination" => pagination} = params
+    pagination = String.to_integer(pagination)
+
+    query =
+      from u in "crawl",
+        where: u.page == ^pagination,
+        select: [
+          u.page,
+          u.title,
+          u.link,
+          u.thumbnail,
+          u.number_of_episode,
+          u.year,
+          u.full_series
+        ]
+
+    res = Repo.all(query)
+    # IO.inspect(res, label: "show.html +++++++++++++++++++++++++=")
+    render(conn, "show.html", list_films: res, pagination: pagination)
   end
 end
