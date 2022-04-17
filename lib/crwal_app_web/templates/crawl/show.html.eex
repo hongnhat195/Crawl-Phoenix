@@ -1,4 +1,6 @@
-<div class="d-flex flex-row justify-content-between">
+<div class= "container-fluid show">
+<div class="d-flex flex-row justify-content-around pt-5">
+
 <div class="left  ">
 <%= if @pagination > 1 do %>
 <button class="btn btn-light"><%= link "First", to: Routes.crawl_path(@conn, :pagination_page, pagination:  1 ), class: "nav-link" %></button>
@@ -31,30 +33,27 @@
 </div>
 
 </div>
-<table class="table  fs-3 table-responsive text-center ">
-  <thead>
-    <tr>
-      <th scope="col">Page</th>
-      <th scope="col">Title</th>
-      <th scope="col">Link</th>
-      <th scope="col">Thumbnail</th>
-      <th scope="col">Episode</th>
-      <th scope="col">Year</th>
-      <th scope="col">Full_series</th>
-    </tr>
-  </thead>
-  <tbody>
-  <%= for film <- @list_films do %>
-    <tr>
-      <th scope="row"> <%=Enum.at(film, 0) %> </th>
-      <td> <%=Enum.at(film, 1) %></td>
-      <td> <a target="_blank" href={"#{Enum.at(film, 2)}"}> <%=Enum.at(film, 2) %> </a></td>
-      <td> <a target="_blank" href={"#{Enum.at(film, 3)}"}> <%=Enum.at(film, 3) %>  </a></td>
-      <td> <%=Enum.at(film, 4) %></td>
-      <td> <%=Enum.at(film, 5) %></td>
-      <td> <%=Enum.at(film, 6) %></td>
-    </tr>
-   <% end %>
-  </tbody>
-</table>
 
+<div class = "grid-container container-fluid ">
+ <%= for film <- @list_films do %>
+    <div class = "grid-item"> 
+      <div class="item">
+        <div href="<%= Enum.at(film, 2)%> " target="_blank"  
+        class = "block-wrapper">
+            <img class="w-100" src = "<%= Enum.at(film, 3)%> " />
+            <div class="more">
+           
+            <p> Năm sản xuất: <%= Enum.at(film, 5)%> </p>
+            <p> Số tập đã phát: <%= Enum.at(film, 4)%> </p>
+            <p> Full Series: <%= if Enum.at(film,6) == false do "False" else "True" end %> </p>
+            </div>
+        </div>
+        <div class= "film-meta">
+            <p> <a href="<%= Enum.at(film, 2)%> " target="_blank"> <%= Enum.at(film, 1)%> - <%= Enum.at(film, 5)%> </a> </p>
+        </div>
+      </div >  
+    </div>
+    
+ <% end %>
+</div>
+</div>

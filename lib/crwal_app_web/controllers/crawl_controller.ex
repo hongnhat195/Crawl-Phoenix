@@ -15,9 +15,13 @@ defmodule CrwalAppWeb.CrawlController do
     if File.exists?("priv/static/film.json") do
       render(conn, "action.html")
     else
+      errors_url(conn, url)
       Untils.main(url)
       render(conn, "action.html")
     end
+
+    # Untils.main(url)
+    render(conn, "action.html")
   end
 
   def download(conn, _params) do
@@ -27,15 +31,32 @@ defmodule CrwalAppWeb.CrawlController do
 
   def show(conn, _params) do
     if Repo.all(Crawl) == [] do
-      {:ok, list} = File.read("priv/static/film.json")
-      IO.inspect(list)
-      {:ok, list1} = Jason.decode(list, keys: :atoms)
-      list_film = list1[:list_films]
-      IO.inspect(list_film)
-      Repo.insert_all(Crawl, list_film)
+      case File.read("priv/static/film.json") do
+        {:ok, list} ->
+          {:ok, list1} = Jason.decode(list, keys: :atoms)
+          list_film = list1[:list_films]
+          Repo.insert_all(Crawl, list_film)
+
+        {:error, :enoent} ->
+          conn
+          |> put_flash(:error, "We can not read this file, try again !")
+          |> redirect(to: Routes.crawl_path(conn, :index))
+          |> halt()
+      end
     end
 
     pagination_page(conn, %{"pagination" => "1"})
+  end
+
+  def errors_url(conn, url) do
+    if HTTPoison.get!(url).status_code == 404 do
+      conn
+      |> put_flash(:error, "We can not find this url, try again !")
+      |> redirect(to: Routes.crawl_path(conn, :index))
+      |> halt()
+    else
+      conn
+    end
   end
 
   def pagination_page(conn, %{"pagination" => pagination}) do
@@ -44,7 +65,6 @@ defmodule CrwalAppWeb.CrawlController do
     max_pages = Repo.all(max_page()) |> Enum.at(0) |> String.to_integer()
     res = query_film(pagination)
 
-    IO.inspect(max_pages, label: "show.html +++++++++++++++++++++++++: ")
     render(conn, "show.html", list_films: res, pagination: pagination, max_pages: max_pages)
   end
 

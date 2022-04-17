@@ -2,7 +2,7 @@ import Config
 
 # Configure your database
 config :crwal_app, CrwalApp.Repo,
-  username: "nhat195",
+  username: "hongnhat",
   password: "1952001",
   hostname: "localhost",
   database: "crwal_app_dev",

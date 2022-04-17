@@ -28,9 +28,9 @@ defmodule Untils do
     time
   end
 
-  def total_page(response) do
-    response1 = HTTPoison.get!(response)
-    {:ok, document} = Floki.parse_document(response1.body)
+  def total_page(url) do
+    response = HTTPoison.get!(url)
+    {:ok, document} = Floki.parse_document(response.body)
 
     total_page =
       document
@@ -77,6 +77,13 @@ defmodule Untils do
 
         # year
         year = Floki.find(element, "span.movie-title-2") |> Floki.text() |> String.slice(-5..-2)
+
+        year =
+          if Regex.match?(~r/^\d+$/, year) do
+            year
+          else
+            "2022"
+          end
 
         # link
         link = Floki.text(Floki.attribute(element, "href"))
