@@ -28,9 +28,9 @@ defmodule Untils do
     time
   end
 
-  def total_page(response) do
-    response1 = HTTPoison.get!(response)
-    {:ok, document} = Floki.parse_document(response1.body)
+  def total_page(url) do
+    response = HTTPoison.get!(url)
+    {:ok, document} = Floki.parse_document(response.body)
 
     total_page =
       document
