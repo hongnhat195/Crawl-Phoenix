@@ -18,6 +18,9 @@ defmodule CrwalAppWeb.CrawlController do
       Untils.main(url)
       render(conn, "action.html")
     end
+
+    # Untils.main(url)
+    render(conn, "action.html")
   end
 
   def download(conn, _params) do
@@ -28,14 +31,15 @@ defmodule CrwalAppWeb.CrawlController do
   def show(conn, _params) do
     if Repo.all(Crawl) == [] do
       {:ok, list} = File.read("priv/static/film.json")
-      IO.inspect(list)
       {:ok, list1} = Jason.decode(list, keys: :atoms)
       list_film = list1[:list_films]
-      IO.inspect(list_film)
       Repo.insert_all(Crawl, list_film)
     end
 
     pagination_page(conn, %{"pagination" => "1"})
+  end
+
+  def filter() do
   end
 
   def pagination_page(conn, %{"pagination" => pagination}) do

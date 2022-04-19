@@ -78,6 +78,13 @@ defmodule Untils do
         # year
         year = Floki.find(element, "span.movie-title-2") |> Floki.text() |> String.slice(-5..-2)
 
+        year =
+          if Regex.match?(~r/^\d+$/, year) do
+            year
+          else
+            "2022"
+          end
+
         # link
         link = Floki.text(Floki.attribute(element, "href"))
 
