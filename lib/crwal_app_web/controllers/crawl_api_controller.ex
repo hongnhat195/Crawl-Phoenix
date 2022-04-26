@@ -64,6 +64,8 @@ defmodule CrwalAppWeb.CrawlApiController do
   end
 
   def pagination_page(conn, %{"pagination" => pagination}) do
+    # IO.inspect(actor)
+
     pagination = String.to_integer(pagination)
 
     max_pages = Repo.all(max_page()) |> Enum.at(0) |> String.to_integer()
@@ -72,6 +74,57 @@ defmodule CrwalAppWeb.CrawlApiController do
     conn
     |> put_status(:ok)
     |> json(%{list_films: res, pagination: pagination, max_pages: max_pages})
+  end
+
+  def query_country(conn, _params) do
+    query =
+      from p in Actor,
+        select: p.name
+
+    list_country = Repo.all(query)
+    conn |> put_status(:ok) |> json(%{list_country: list_country})
+  end
+
+  def filter_by_country(conn, %{"pagination" => pagination, "country" => country}) do
+    IO.inspect(country)
+
+    query =
+      if country != "" do
+        from u in "crawl",
+          where: u.country == ^country,
+          where: u.page == ^(pagination |> String.to_integer()),
+          select: [
+            u.page,
+            u.title,
+            u.link,
+            u.thumbnail,
+            u.number_of_episode,
+            u.year,
+            u.full_series,
+            u.country,
+            u.actor
+          ]
+      else
+        from u in "crawl",
+          where: u.page == ^(pagination |> String.to_integer()),
+          select: [
+            u.page,
+            u.title,
+            u.link,
+            u.thumbnail,
+            u.number_of_episode,
+            u.year,
+            u.full_series,
+            u.country,
+            u.actor
+          ]
+      end
+
+    list_films = Repo.all(query)
+
+    conn
+    |> put_status(:ok)
+    |> json(%{list_films: list_films})
   end
 
   defp query_film(pagination) do

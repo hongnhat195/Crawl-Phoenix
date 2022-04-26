@@ -3,6 +3,9 @@
   background: linear-gradient(to right, #4daf54, #3d8880) !important;
   font-size: 62.5%;
 }
+.header {
+  font-size: 3rem;
+}
 .grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

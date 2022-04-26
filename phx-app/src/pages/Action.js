@@ -5,7 +5,10 @@ export default function Action() {
     <div className="container w-100">
       <h3>
         Click{" "}
-        <a href="http://localhost:4000/download" target="_blank">
+        <a
+          rel="noreferrer"
+          href="http://localhost:4000/download"
+          target="_blank">
           here
         </a>{" "}
         to download this data
