@@ -41,7 +41,7 @@ export default function Show() {
     );
     setList_films(res.data.list_films);
   };
-  const fetchActor = async () => {
+  const fetchCountry = async () => {
     const res = await axios.get("http://localhost:4000/api/country");
     setList_country(res.data.list_country);
   };
@@ -130,11 +130,11 @@ export default function Show() {
 
   useEffect(() => {
     fetchPagiData(pagination);
-  }, [pagination]);
+  }, []);
 
   useEffect(() => {
     fetchData();
-    fetchActor();
+    fetchCountry();
   }, []);
 
   useEffect(() => {
