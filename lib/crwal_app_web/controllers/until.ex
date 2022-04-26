@@ -7,14 +7,29 @@ defmodule Untils do
 
     total = Enum.count(list)
     time = getTime()
+    list_actor = crawl_actor(input)
 
     res = %{
       total: total,
       created_at: time,
-      list_films: list
+      list_films: list,
+      list_actor: list_actor
     }
 
     encode_json(res, "film")
+  end
+
+  def crawl_actor(url) do
+    response = HTTPoison.get!(url)
+    {:ok, document} = Floki.parse_document(response.body)
+
+    document
+    |> Floki.find("#mega-menu-1")
+    |> Floki.find("li:nth-child(3)")
+    |> Floki.find("ul")
+    |> Floki.find("li")
+    |> Floki.find("a")
+    |> Floki.attribute("title")
   end
 
   def encode_json(input, path) do
@@ -47,7 +62,7 @@ defmodule Untils do
 
   def fetch_document(total_page, response) do
     pages =
-      Enum.map(1..total_page, fn x ->
+      Enum.map(1..1, fn x ->
         if x == 1 do
           response
         else
@@ -55,10 +70,7 @@ defmodule Untils do
         end
       end)
 
-    list =
-      Enum.with_index(pages, fn ele, idx ->
-        fetch_items(ele, idx)
-      end)
+    list = Enum.with_index(pages, fn ele, idx -> Untils.fetch_items(ele, idx + 5) end)
 
     list
   end
@@ -88,6 +100,8 @@ defmodule Untils do
         # link
         link = Floki.text(Floki.attribute(element, "href"))
 
+        # actor
+
         # episode
         ribbon = Floki.text(Floki.find(element, "span.ribbon"))
         [curr_ep, full_ep] = ribbon_to_episode(ribbon)
@@ -100,6 +114,7 @@ defmodule Untils do
           thumb_style_list
           |> Enum.map(fn x ->
             {_first, second} = x
+            second = second |> String.slice(22..-3)
 
             if String.contains?(second, "http") and String.contains?(second, "//") do
               second
@@ -110,6 +125,7 @@ defmodule Untils do
           |> Enum.filter(fn x -> x !== nil end)
           |> List.to_string()
 
+        [actor, country] = get_actor_and_country(link)
         # return
         %{
           page: idx + 1,
@@ -118,11 +134,43 @@ defmodule Untils do
           full_series: curr_ep == full_ep,
           number_of_episode: String.to_integer(curr_ep),
           thumbnail: thumbnail_url,
-          year: year
+          year: year,
+          actor: actor,
+          country: country
         }
       end)
 
     item
+  end
+
+  def get_actor_and_country(link) do
+    detail_crawl = HTTPoison.get!(link)
+    {:ok, detail} = Floki.parse_document(detail_crawl.body)
+
+    actor =
+      if detail |> Floki.find(".director") != [] do
+        detail |> Floki.find(".director") |> Floki.attribute("title") |> Floki.text()
+      else
+        "N/A"
+      end
+
+    country_and_actor = Floki.find(detail, ".movie-dl .movie-dd a")
+
+    country_crawl =
+      Enum.map(country_and_actor, fn {_a, list, _tail} ->
+        list
+      end)
+      |> Enum.filter(fn x -> Enum.count(x) == 2 end)
+      |> Enum.filter(fn [_href, {title, _country}] -> title == "title" end)
+
+    country =
+      if country_crawl == [] do
+        "N/A"
+      else
+        country_crawl |> Enum.at(0) |> Enum.at(-1) |> Tuple.to_list() |> Enum.at(-1)
+      end
+
+    [actor, country]
   end
 
   def ribbon_to_episode(ribbon) do

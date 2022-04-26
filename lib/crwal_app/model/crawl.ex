@@ -10,11 +10,23 @@ defmodule CrwalApp.Crawl do
     field :number_of_episode, :integer
     field :year, :string
     field :thumbnail, :string
+    field :actor, :string
+    field :country, :string
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:page, :title, :link, :number_of_episode, :full_series, :year, :thumbnail])
+    |> cast(params, [
+      :page,
+      :title,
+      :link,
+      :number_of_episode,
+      :full_series,
+      :year,
+      :thumbnail,
+      :actor,
+      :country
+    ])
     |> validate_required([
       :page,
       :title,
@@ -22,7 +34,9 @@ defmodule CrwalApp.Crawl do
       :full_series,
       :number_of_episode,
       :year,
-      :thumbnail
+      :thumbnail,
+      :actor,
+      :country
     ])
   end
 end

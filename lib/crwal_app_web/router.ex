@@ -12,6 +12,7 @@ defmodule CrwalAppWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug CORSPlug
   end
 
   scope "/", CrwalAppWeb do
@@ -25,9 +26,13 @@ defmodule CrwalAppWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", CrwalAppWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", CrwalAppWeb do
+    pipe_through :api
+    post "/", CrawlApiController, :crawl
+    get "/download", CrawlApiController, :download
+    get "/show", CrawlApiController, :show
+    get "/pagi", CrawlApiController, :pagination_page
+  end
 
   # Enables LiveDashboard only for development
   #

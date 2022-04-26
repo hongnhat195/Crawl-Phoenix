@@ -51,7 +51,8 @@ defmodule CrwalApp.MixProject do
       {:httpoison, "~> 1.8"},
       {:floki, "~> 0.30.0"},
       {:calendar, "~> 1.0.0"},
-      {:json, "~> 1.4"}
+      {:json, "~> 1.4"},
+      {:cors_plug, "~> 3.0"}
     ]
   end
 
