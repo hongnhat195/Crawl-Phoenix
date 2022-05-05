@@ -7,6 +7,7 @@ export default function Show() {
   const [max_pages, setMaxx] = useState(0);
   const [list_country, setList_country] = useState([]);
   const [country, setCountry] = useState("");
+  const [actor, setActor] = useState("");
   const fetchData = async () => {
     const res = await axios.get("http://localhost:4000/api/show");
     setList_films(res.data.list_films);
@@ -16,47 +17,45 @@ export default function Show() {
 
   const fetchPagiData = async (pagination) => {
     const res = await axios.get(
-      `http://localhost:4000/api/pagi?pagination=${pagination}`
+      `http://localhost:4000/api/pagi?pagination=${pagination}&country=${country}&actor=${actor}`
     );
+    console.log(res.data);
     setList_films(res.data.list_films);
     setPagination(res.data.pagination);
   };
-  const showDropdownActor = (list_country) => {
-    return list_country.map((country) => {
+
+  const fetchCountry = async () => {
+    const res = await axios.get("http://localhost:4000/api/country");
+    setList_country(res.data.list_country);
+  };
+
+  const showDropdownCountry = (list_country) => {
+    return list_country.map((country, idx) => {
       return (
-        <li>
-          <div
-            onClick={() => setCountry(country)}
-            value={country}
-            className="dropdown-item">
+        <li key={idx}>
+          <div onClick={() => setCountry(country)} className="dropdown-item">
             {country}
           </div>
         </li>
       );
     });
   };
-  const filter_by_country = async (page, country) => {
-    const res = await axios.get(
-      `http://localhost:4000/api/show_filter?pagination=${page}&country=${country}`
-    );
-    setList_films(res.data.list_films);
-  };
-  const fetchCountry = async () => {
-    const res = await axios.get("http://localhost:4000/api/country");
-    setList_country(res.data.list_country);
-  };
 
   const showFilms = (list_films) => {
-    return list_films.map((film) => {
+    return list_films.map((film, idx) => {
       return (
-        <div className="grid-item">
+        <div key={idx} className="grid-item">
           <div className="item">
             <div className="block-wrapper">
               <img className="w-100" src={film[3]} alt={film[3]} />
               <div className="more">
                 <p> Năm sản xuất: {film[5]} </p>
                 <p> Số tập đã phát: {film[4]} </p>
-                <p> Full Series: {film[6]} </p>
+                <p>
+                  Full Series:{" "}
+                  {film[6] === false ? "Chưa full" : "Đã hoàn thành"}
+                </p>
+                <p> Đạo diễn: {film[8]} </p>
               </div>
             </div>
             <div className="film-meta">
@@ -81,24 +80,24 @@ export default function Show() {
   const showLeftButton = (pagination) => {
     if (pagination > 1) {
       return (
-        <div className="btn-group">
+        <>
           <button onClick={() => setPagination(1)} class="btn btn-light">
             Fisrt
           </button>
 
           <button
             onClick={() => setPagination(pagination - 1)}
-            class="btn btn-light">
+            className="btn btn-light">
             Prev
           </button>
 
           <button
             onClick={() => setPagination(pagination - 1)}
-            class="btn btn-light">
+            className="btn btn-light">
             {" "}
             {pagination - 1}{" "}
           </button>
-        </div>
+        </>
       );
     }
   };
@@ -106,62 +105,63 @@ export default function Show() {
   const showRightButton = (pagination) => {
     if (pagination < max_pages)
       return (
-        <div className="btn-group">
+        <>
           <button
             onClick={() => setPagination(pagination + 1)}
-            class="btn btn-light">
+            className="btn btn-light">
             {" "}
             {pagination + 1}
           </button>
 
           <button
             onClick={() => setPagination(pagination + 1)}
-            class="btn btn-light">
+            className="btn btn-light">
             Next
           </button>
           <button
             onClick={() => setPagination(max_pages)}
-            class="btn btn-light">
+            className="btn btn-light">
             Last
           </button>
-        </div>
+        </>
       );
   };
 
   useEffect(() => {
     fetchPagiData(pagination);
-  }, []);
+  }, [pagination, country, actor]);
 
   useEffect(() => {
     fetchData();
     fetchCountry();
   }, []);
 
-  useEffect(() => {
-    filter_by_country(pagination, country);
-    console.log(pagination, country);
-  }, [country, pagination]);
-
   return (
     <div>
-      <div class="container-fluid show">
-        <div class=" header d-flex flex-row justify-content-around pt-5">
-          <div class="left btn-group">
+      <div className="container-fluid show">
+        <div className="header d-flex flex-row justify-content-around  pt-5">
+          <div className="left  btn-group d-flex flex-row flex-wrap align-middle">
             {showLeftButton(pagination)}
-            <button className="btn btn-success"> {pagination} </button>
+            <button
+              onClick={() => setPagination(pagination)}
+              className="btn btn-success">
+              {" "}
+              {pagination}{" "}
+            </button>
             {showRightButton(pagination)}
             <div></div>
           </div>
-          <div className="right d-flex flex-row  justify-content-around ">
+          <div className="right d-flex flex-row  justify-content-around align-middle ">
             <input
+              onChange={(e) => setActor(e.target.value)}
               type="text"
               placeholder="Filter by actor"
-              className="w-100  me-3 form-control form-control-lg"
+              className=" me-5 pe-5  form-control-lg"
             />
 
             <div className="dropdown">
               <button
-                className="btn btn-secondary mb-5 dropdown-toggle "
+                className="btn btn-secondary p-5 dropdown-toggle text-center "
                 type="button"
                 id="dropdownMenuButton1"
                 data-bs-toggle="dropdown"
@@ -171,7 +171,16 @@ export default function Show() {
               <ul
                 className="dropdown-menu"
                 aria-labelledby="dropdownMenuButton1">
-                {showDropdownActor(list_country)}
+                <li>
+                  <div
+                    onClick={() => {
+                      setCountry("");
+                    }}
+                    className="dropdown-item">
+                    Tất cả quốc gia
+                  </div>
+                </li>
+                {showDropdownCountry(list_country)}
               </ul>
             </div>
           </div>

@@ -12,6 +12,8 @@ defmodule CrwalApp.Crawl do
     field :thumbnail, :string
     field :actor, :string
     field :country, :string
+    field :country_id, :integer
+    # belongs_to :country, Country
   end
 
   def changeset(struct, params \\ %{}) do

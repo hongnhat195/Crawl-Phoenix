@@ -15,16 +15,20 @@ export default function Home() {
   };
   return (
     <div className="container w-50" style={{ fontSize: "5rem" }}>
-      <div class="mb-3">
+      <div class="mb-3 ">
         <label class="form-label">Enter the URL:</label>
         <input
+          style={{ fontSize: "2rem" }}
           type="text"
           class="form-control"
           value={value}
           onChange={handleChange}
         />
       </div>
-      <button className="btn btn-primary" onClick={handleSubmit}>
+      <button
+        style={{ fontSize: "2rem" }}
+        className="btn btn-primary"
+        onClick={handleSubmit}>
         Submit
       </button>
     </div>

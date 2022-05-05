@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function Action() {
   return (
     <div className="container w-100">
-      <h3>
+      <h1>
         Click{" "}
         <a
           rel="noreferrer"
@@ -12,12 +12,12 @@ export default function Action() {
           here
         </a>{" "}
         to download this data
-      </h3>
+      </h1>
       <br />
       <br />
-      <h3>
+      <h1>
         Click <Link to="/show">here</Link> to show data
-      </h3>
+      </h1>
     </div>
   );
 }

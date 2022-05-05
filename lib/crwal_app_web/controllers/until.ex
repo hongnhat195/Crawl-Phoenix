@@ -62,7 +62,7 @@ defmodule Untils do
 
   def fetch_document(total_page, response) do
     pages =
-      Enum.map(1..1, fn x ->
+      Enum.map(4..7, fn x ->
         if x == 1 do
           response
         else
@@ -70,7 +70,7 @@ defmodule Untils do
         end
       end)
 
-    list = Enum.with_index(pages, fn ele, idx -> Untils.fetch_items(ele, idx + 5) end)
+    list = Enum.with_index(pages, fn ele, idx -> Untils.fetch_items(ele, idx + 3) end)
 
     list
   end

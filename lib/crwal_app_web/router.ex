@@ -33,7 +33,6 @@ defmodule CrwalAppWeb.Router do
     get "/show", CrawlApiController, :show
     get "/pagi", CrawlApiController, :pagination_page
     get "/country", CrawlApiController, :query_country
-    get "/show_filter", CrawlApiController, :filter_by_country
   end
 
   # Enables LiveDashboard only for development

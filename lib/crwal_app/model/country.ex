@@ -1,9 +1,10 @@
-defmodule CrwalApp.Actor do
+defmodule CrwalApp.Country do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "actor" do
+  schema "country" do
     field :name, :string
+    # has_many :crawl, Crawl
   end
 
   def changeset(struct, param \\ %{}) do

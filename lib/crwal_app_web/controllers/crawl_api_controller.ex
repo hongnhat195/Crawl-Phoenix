@@ -3,33 +3,33 @@ defmodule CrwalAppWeb.CrawlApiController do
   alias Untils
   alias CrwalApp.Repo
   alias CrwalApp.Crawl
-  alias CrwalApp.Actor
+  alias CrwalApp.Country
 
-  import Ecto.Query, warn: false, only: [from: 2]
+  import Ecto.Query, warn: false
 
+  # with
   def crawl(conn, %{"url" => url}) do
-    if File.exists?("priv/static/film.json") do
-      conn
-      |> put_status(:created)
-      |> json(%{})
-    else
-      errors_url(conn, url)
-      Untils.main(url)
+    case File.exists?("priv/static/film.json") do
+      true ->
+        conn
+        |> put_status(:created)
+        |> json(%{})
 
-      conn
-      |> put_status(:created)
-      |> json(%{})
-    end
-  end
+      false ->
+        case HTTPoison.get!(url).status_code == 404 do
+          true ->
+            conn
+            |> put_status(:request_timeout)
+            |> json(%{})
+            |> halt()
 
-  def errors_url(conn, url) do
-    if HTTPoison.get!(url).status_code == 404 do
-      conn
-      |> put_status(:request_timeout)
-      |> json(%{})
-      |> halt()
-    else
-      conn
+          false ->
+            Untils.main(url)
+
+            conn
+            |> put_status(:created)
+            |> json(%{})
+        end
     end
   end
 
@@ -39,109 +39,138 @@ defmodule CrwalAppWeb.CrawlApiController do
   end
 
   def show(conn, _params) do
-    case File.read("priv/static/film.json") do
-      {:ok, list} ->
-        {:ok, list1} = Jason.decode(list, keys: :atoms)
+    with {:ok, list} <- File.read("priv/static/film.json"),
+         {:ok, list1} <-
+           Jason.decode(list, keys: :atoms) do
+      if(Repo.all(Country) == []) do
+        list_country = list1[:list_actor] |> Enum.map(fn x -> %{name: x} end)
 
-        if Repo.all(Crawl) == [] do
-          list_film = list1[:list_films]
-          Repo.insert_all(Crawl, list_film)
-        end
+        list_film = list1[:list_films]
+        CrwalApp.Repo.insert_all(CrwalApp.Country, list_country)
+        list_country = Repo.all(Country)
 
-        if(Repo.all(Actor) == []) do
-          list_actor = list1[:list_actor] |> Enum.map(fn x -> %{name: x} end)
-          CrwalApp.Repo.insert_all(CrwalApp.Actor, list_actor)
-        end
+        films =
+          Enum.map(list_film, fn x ->
+            Enum.map(list_country, fn y ->
+              if x[:country] == y.name do
+                Map.put(x, :country_id, y.id)
+              end
+            end)
+          end)
+          |> List.flatten()
+          |> Enum.filter(fn x -> x != nil end)
 
-      {:error, :enoent} ->
+        Repo.insert_all(Crawl, films |> List.flatten())
+      end
+    else
+      {:error, _enoent} ->
         conn
         |> put_status(:bad_request)
         |> json(%{})
         |> halt()
     end
 
-    pagination_page(conn, %{"pagination" => "1"})
+    pagination_page(conn, %{"pagination" => "1", "country" => "", "actor" => ""})
   end
 
-  def pagination_page(conn, %{"pagination" => pagination}) do
-    # IO.inspect(actor)
-
+  def pagination_page(conn, %{"pagination" => pagination, "country" => country, "actor" => actor}) do
+    # max_pages = Repo.all(max_page()) |> Enum.at(0) |> String.to_integer()
     pagination = String.to_integer(pagination)
+    num_of_film = from(f in Crawl, select: f.id) |> Repo.aggregate(:count, :id)
+    chunk = 20
+    max_page = ceil(num_of_film / chunk)
+    offset = chunk * (pagination - 1)
+    IO.inspect(chunk)
+    IO.inspect(offset)
+    IO.inspect(max_page)
 
-    max_pages = Repo.all(max_page()) |> Enum.at(0) |> String.to_integer()
-    res = query_film(pagination)
+    query =
+      cond do
+        country != "" and actor == "" ->
+          Crawl
+          |> where([u], u.country == ^country)
+          |> select([u], [
+            u.page,
+            u.title,
+            u.link,
+            u.thumbnail,
+            u.number_of_episode,
+            u.year,
+            u.full_series,
+            u.country,
+            u.actor
+          ])
+          |> limit(^chunk)
+          |> offset(^offset)
+
+        country == "" and actor == "" ->
+          Crawl
+          |> select([u], [
+            u.page,
+            u.title,
+            u.link,
+            u.thumbnail,
+            u.number_of_episode,
+            u.year,
+            u.full_series,
+            u.country,
+            u.actor
+          ])
+          |> limit(^chunk)
+          |> offset(^offset)
+
+        country == "" and actor != "" ->
+          actor1 = "#{actor}%"
+
+          Crawl
+          |> where([u], ilike(u.actor, ^actor1))
+          |> select([u], [
+            u.page,
+            u.title,
+            u.link,
+            u.thumbnail,
+            u.number_of_episode,
+            u.year,
+            u.full_series,
+            u.country,
+            u.actor
+          ])
+          |> limit(^chunk)
+          |> offset(^offset)
+
+        country != "" and actor != "" ->
+          actor1 = "#{actor}%"
+
+          Crawl
+          |> where([u], u.country == ^country)
+          |> where([u], ilike(u.actor, ^actor1))
+          |> select([u], [
+            u.page,
+            u.title,
+            u.link,
+            u.thumbnail,
+            u.number_of_episode,
+            u.year,
+            u.full_series,
+            u.country,
+            u.actor
+          ])
+          |> limit(^chunk)
+          |> offset(^offset)
+      end
 
     conn
     |> put_status(:ok)
-    |> json(%{list_films: res, pagination: pagination, max_pages: max_pages})
+    |> json(%{list_films: Repo.all(query), pagination: pagination, max_pages: max_page})
   end
 
   def query_country(conn, _params) do
     query =
-      from p in Actor,
+      from p in Country,
         select: p.name
 
     list_country = Repo.all(query)
     conn |> put_status(:ok) |> json(%{list_country: list_country})
-  end
-
-  def filter_by_country(conn, %{"pagination" => pagination, "country" => country}) do
-    IO.inspect(country)
-
-    query =
-      if country != "" do
-        from u in "crawl",
-          where: u.country == ^country,
-          where: u.page == ^(pagination |> String.to_integer()),
-          select: [
-            u.page,
-            u.title,
-            u.link,
-            u.thumbnail,
-            u.number_of_episode,
-            u.year,
-            u.full_series,
-            u.country,
-            u.actor
-          ]
-      else
-        from u in "crawl",
-          where: u.page == ^(pagination |> String.to_integer()),
-          select: [
-            u.page,
-            u.title,
-            u.link,
-            u.thumbnail,
-            u.number_of_episode,
-            u.year,
-            u.full_series,
-            u.country,
-            u.actor
-          ]
-      end
-
-    list_films = Repo.all(query)
-
-    conn
-    |> put_status(:ok)
-    |> json(%{list_films: list_films})
-  end
-
-  defp query_film(pagination) do
-    query =
-      from u in "crawl",
-        where: u.page == ^pagination,
-        select: [
-          u.page,
-          u.title,
-          u.link,
-          u.thumbnail,
-          u.number_of_episode,
-          u.year,
-          u.full_series
-        ]
-
-    Repo.all(query)
   end
 
   defp max_page() do
